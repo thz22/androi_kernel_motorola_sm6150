@@ -368,9 +368,9 @@ else
 HOSTCC	= gcc
 HOSTCXX	= g++
 endif
-HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 \
+HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 \
 		-fomit-frame-pointer -std=gnu89 $(HOST_LFS_CFLAGS)
-HOSTCXXFLAGS := -O2 $(HOST_LFS_CFLAGS)
+HOSTCXXFLAGS := -O3 $(HOST_LFS_CFLAGS)
 HOSTLDFLAGS  += $(HOST_LFS_LDFLAGS)
 HOST_LOADLIBES := $(HOST_LFS_LIBS)
 
@@ -717,10 +717,27 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, int-in-bool-context)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, address-of-packed-member)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, attribute-alias)
 
+KBUILD_CFLAGS += -pipe
+
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS   += -Os
 else
 KBUILD_CFLAGS   += -O3
+endif
+
+ifeq ($(cc-name),clang)
+KBUILD_CFLAGS += -march=armv8.2-a+crypto+crc+lse+dotprod \
+	-mcpu=cortex-a55+crypto+crc+lse+dotprod \
+	-mllvm -inline-threshold=1000 \
+	-mllvm -inlinehint-threshold=1000 \
+	-mllvm -polly \
+	-mllvm -polly-postopts \
+	-mllvm -polly-ast-use-context \
+	-mllvm -polly-ast-detect-parallel \
+	-mllvm -polly-run-inliner \
+	-mllvm -polly-reschedule \
+	-mllvm -polly-loopfusion-greedy \
+	-mllvm -polly-vectorizer=stripmine
 endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
@@ -798,7 +815,11 @@ KBUILD_CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
 endif
 
 ifeq ($(ld-name),lld)
+ifdef CONFIG_LTO_CLANG
+LDFLAGS += --lto-O3
+else
 LDFLAGS += -O3
+endif
 endif
 
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-const-variable)
@@ -878,9 +899,6 @@ else
 lto-clang-flags	:= -flto
 endif
 lto-clang-flags += -fvisibility=default $(call cc-option, -fsplit-lto-unit)
-
-# Limit inlining across translation units to reduce binary size
-LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=5
 
 KBUILD_LDFLAGS += $(LD_FLAGS_LTO_CLANG)
 KBUILD_LDFLAGS_MODULE += $(LD_FLAGS_LTO_CLANG)

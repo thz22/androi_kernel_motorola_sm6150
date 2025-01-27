@@ -47,9 +47,10 @@ CONFIG_THREAD_INFO_IN_TASK=y
 CONFIG_ASMP=y
 
 #
-# Inline Optimizations
+# Optimizations
 #
 CONFIG_INLINE_OPTIMIZATION=y
+CONFIG_LLVM_POLLY=y
 
 #
 # General setup

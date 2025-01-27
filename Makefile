@@ -411,11 +411,13 @@ CHECK		= sparse
 
 ifneq ($(LLVM),)
     ifeq ($(ARCH),arm64)
+        # Otimizações para Cortex-A53
         KBUILD_CFLAGS += -mcpu=cortex-a53 -mtune=cortex-a53 -march=armv8-a -mfpu=neon-fp-armv8 -mfloat-abi=hard
+        
+        # Otimizações para Cortex-A73
+        KBUILD_CFLAGS += -mcpu=cortex-a73 -mtune=cortex-a73 -march=armv8-a -mfpu=neon-fp-armv8 -mfloat-abi=hard
     endif
-endif
 
-ifneq ($(LLVM),)
     ifdef CONFIG_LLVM_POLLY
         KBUILD_CFLAGS += -mllvm -polly \
                          -mllvm -polly-run-dce \

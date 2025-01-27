@@ -47,6 +47,11 @@ CONFIG_THREAD_INFO_IN_TASK=y
 CONFIG_ASMP=y
 
 #
+# Inline Optimizations
+#
+CONFIG_INLINE_OPTIMIZATION=y
+
+#
 # General setup
 #
 CONFIG_INIT_ENV_ARG_LIMIT=32
